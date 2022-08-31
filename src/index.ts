@@ -7,7 +7,7 @@ declare global {
 }
 
 export const pRej = function() {
-	let status, message, res;
+	let status: string, message: string, res;
 	for (const i in Array.from(arguments)){
 		switch(typeof arguments[i]){
 			case 'number':
@@ -20,7 +20,7 @@ export const pRej = function() {
 				res = arguments[i];
 		}
 	}
-	return err => {
+	return (err: any) => {
 		return Promise.reject({
 		status: (err ? err.status : null) || status || 500, 
 		message: (err && err.status 
@@ -52,10 +52,19 @@ class RedMongo{
 	constructor(Mongoose: typeof mongoose,Redis: Redis){
 		this.mongoose = mongoose;
 		this.redis = Redis;
-	}		
+	}
+	__Schemas: {
+		[name: string]: {
+			schemaObject: {[key: string]: any}, 
+			options: {}
+		}
+	} = {}
 	Schema = class <T extends SchemaTemplate> implements Schema{
 		redis =  global.RedMongo.redis
 		mongoose = global.RedMongo.mongoose
+		__prev: Partial<T>
+		__hasBeenModified: (keyof T)[]
+		__modified: (keyof T)[];
 		static redis = global.RedMongo.redis
 		static mongoose = global.RedMongo.mongoose;
 		static __Schema: mongoose.Schema
